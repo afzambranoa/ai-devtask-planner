@@ -1,0 +1,28 @@
+{
+  "name": "ai-devtask-planner",
+  "version": "1.0.0",
+  "description": "Motor Inteligente de Planificacion y Desglose de Software con IA",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "devtask": "./dist/cli.js"
+  },
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "build": "tsc",
+    "start": "node dist/cli.js",
+    "demo": "tsx src/cli.ts plan examples/sample_prd.md --provider mock"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.5",
+    "ora": "^8.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "tsx": "^4.19.1",
+    "typescript": "^5.5.4"
+  }
+}

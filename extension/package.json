@@ -1,0 +1,87 @@
+{
+  "name": "ai-devtask-planner",
+  "displayName": "AI DevTask Planner (VS Code & Cursor)",
+  "description": "Desglose automatico de PRDs y requerimientos en Sprint Plans y GitHub Issues con IA",
+  "version": "1.0.0",
+  "publisher": "devtask",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "sprint",
+    "planning",
+    "scrum",
+    "github-issues",
+    "cursor"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onCommand:aiDevTask.planCurrentFile",
+    "onCommand:aiDevTask.openPlannerPanel"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "aiDevTask.planCurrentFile",
+        "title": "AI DevTask: Planificar archivo actual en Sprint Plan",
+        "category": "AI DevTask"
+      },
+      {
+        "command": "aiDevTask.openPlannerPanel",
+        "title": "AI DevTask: Abrir Panel Interactivo de Planificación",
+        "category": "AI DevTask"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "aiDevTask.planCurrentFile",
+          "group": "navigation",
+          "when": "editorTextFocus"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "AI DevTask Planner",
+      "properties": {
+        "aiDevTask.provider": {
+          "type": "string",
+          "default": "gemini",
+          "enum": ["gemini", "openai", "ollama", "mock"],
+          "description": "Proveedor de IA para generar los planes"
+        },
+        "aiDevTask.geminiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Google Gemini API Key"
+        },
+        "aiDevTask.openaiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API Key (o base url para Ollama)"
+        },
+        "aiDevTask.ollamaEndpoint": {
+          "type": "string",
+          "default": "http://localhost:11434/v1",
+          "description": "Endpoint local de Ollama"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.5.4"
+  }
+}

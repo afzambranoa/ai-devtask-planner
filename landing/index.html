@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI DevTask Planner — De Requerimiento a Sprint Plan y GitHub Issues en Segundos</title>
+  <meta name="description" content="Motor inteligente de inteligencia artificial para desarrolladores y Tech Leads. Desglosa PRDs y requerimientos técnicos en tareas granulares, estimaciones realistas y criterios Gherkin listos para tu equipo.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Background Glow FX -->
+  <div class="glow-orb orb-top"></div>
+  <div class="glow-orb orb-bottom"></div>
+
+  <!-- Navigation Bar -->
+  <header class="navbar" id="main-nav">
+    <div class="container nav-content">
+      <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">AI DevTask<span class="highlight">.planner</span></span>
+      </div>
+      <nav class="nav-links">
+        <a href="#simulator">Simulador en Vivo</a>
+        <a href="#roi-calculator">Calculadora ROI</a>
+        <a href="#features">Arquitectura</a>
+        <a href="#pricing">Precios</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="#pricing" class="btn btn-secondary btn-sm" id="nav-early-bird">Acceso Anticipado -50%</a>
+        <a href="#simulator" class="btn btn-primary btn-sm" id="nav-try-free">Probar Simulador</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section" id="hero">
+    <div class="container hero-container">
+      <div class="badge-pill">
+        <span class="badge-dot"></span>
+        <span>NUEVO: Integración nativa con VS Code, Cursor & GitHub Issues</span>
+      </div>
+      <h1 class="hero-title">
+        Pasa de un requerimiento caótico a un <span class="gradient-text">Sprint Plan impecable</span> en 15 segundos
+      </h1>
+      <p class="hero-subtitle">
+        El motor de IA para Tech Leads y desarrolladores que elimina 4+ horas semanales de redacción manual de tickets en Jira y GitHub. Desglose arquitectónico por capas, estimaciones realistas y criterios de aceptación Gherkin.
+      </p>
+      <div class="hero-cta-group">
+        <a href="#simulator" class="btn btn-primary btn-lg" id="hero-cta-primary">
+          <span>Probar en Vivo Ahora</span>
+          <span class="btn-arrow">→</span>
+        </a>
+        <a href="#pricing" class="btn btn-glass btn-lg" id="hero-cta-pricing">
+          <span>Precios y Preventa Early-Bird</span>
+        </a>
+      </div>
+      <div class="social-proof-strip">
+        <div class="proof-item">
+          <span class="proof-icon">🔒</span>
+          <span>100% Compatible con Modelos Locales (Ollama)</span>
+        </div>
+        <div class="proof-divider">•</div>
+        <div class="proof-item">
+          <span class="proof-icon">✨</span>
+          <span>Soporta Google Gemini & Claude 3.5</span>
+        </div>
+        <div class="proof-divider">•</div>
+        <div class="proof-item">
+          <span class="proof-icon">⚡</span>
+          <span>Exporta directo a GitHub CLI y Markdown</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Live Simulator Section -->
+  <section class="section simulator-section" id="simulator">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="section-tag">SIMULADOR EN TIEMPO REAL</span>
+        <h2 class="section-title">Experimenta la velocidad del Core Engine</h2>
+        <p class="section-description">
+          Elige un requerimiento de prueba o pega tu propio caso de uso para ver el desglose en vivo.
+        </p>
+      </div>
+
+      <!-- Simulator Card -->
+      <div class="glass-card simulator-card">
+        <!-- Template Selector Buttons -->
+        <div class="template-selector">
+          <span class="selector-label">Plantillas listas:</span>
+          <button class="tpl-btn active" id="tpl-mobility" data-tpl="mobility">🚗 Flotas & Movilidad</button>
+          <button class="tpl-btn" id="tpl-auth" data-tpl="auth">🔐 Auth Biométrica & 2FA</button>
+          <button class="tpl-btn" id="tpl-checkout" data-tpl="checkout">💳 Checkout Stripe con Webhooks</button>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-container">
+          <div class="input-header">
+            <span class="terminal-dot red"></span>
+            <span class="terminal-dot yellow"></span>
+            <span class="terminal-dot green"></span>
+            <span class="input-label">input_specification.md</span>
+          </div>
+          <textarea id="spec-input" class="code-textarea" rows="7" placeholder="Pega aquí los requerimientos del feature o PRD..."></textarea>
+        </div>
+
+        <!-- Provider Selection & Trigger -->
+        <div class="simulator-controls">
+          <div class="provider-badge-group">
+            <label for="provider-select" class="control-label">Motor de Inferencia:</label>
+            <select id="provider-select" class="select-dropdown">
+              <option value="mock">⚡ DevTask Turbo Engine (Ultra rápido)</option>
+              <option value="gemini">Google Gemini 1.5 Flash</option>
+              <option value="ollama">Ollama Local (Sin enviar datos a la nube)</option>
+            </select>
+          </div>
+          <button id="btn-generate" class="btn btn-primary btn-generate">
+            <span id="btn-spinner" class="spinner hidden"></span>
+            <span id="btn-text">⚡ Generar Sprint Plan en Vivo</span>
+          </button>
+        </div>
+
+        <!-- Live Terminal Progress Display -->
+        <div id="terminal-progress" class="terminal-console hidden">
+          <div class="console-line"><span class="step-badge">[1/4]</span> Parseando requerimientos de negocio y restricciones...</div>
+          <div class="console-line"><span class="step-badge">[2/4]</span> Identificando capas arquitectónicas (Database, Backend, Security)...</div>
+          <div class="console-line"><span class="step-badge">[3/4]</span> Redactando criterios de aceptación Gherkin y cálculo de horas...</div>
+          <div class="console-line"><span class="step-badge">[4/4]</span> Validación de esquema Zod: 100% Estructurado y Libre de Errores.</div>
+        </div>
+
+        <!-- Output Display Area -->
+        <div id="output-container" class="output-container">
+          <!-- Summary Metrics Cards -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <span class="kpi-label">DURACIÓN ESTIMADA</span>
+              <span class="kpi-value" id="kpi-days">14 Días</span>
+              <span class="kpi-sub">1 Sprint Ágil</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">HORAS HOMBRE</span>
+              <span class="kpi-value highlight-cyan" id="kpi-hours">34 Horas</span>
+              <span class="kpi-sub">Esfuerzo neto</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">ÉPICAS TÉCNICAS</span>
+              <span class="kpi-value" id="kpi-epics">3 Capas</span>
+              <span class="kpi-sub">Arquitectura limpia</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">TAREAS DETALLADAS</span>
+              <span class="kpi-value highlight-emerald" id="kpi-tasks">3 Tareas</span>
+              <span class="kpi-sub">Con criterios Gherkin</span>
+            </div>
+          </div>
+
+          <!-- Tabs View -->
+          <div class="tabs-header">
+            <button class="tab-btn active" id="tab-visual" data-tab="visual">Vista Visual de Tareas</button>
+            <button class="tab-btn" id="tab-markdown" data-tab="markdown">SPRINT_PLAN.md</button>
+            <button class="tab-btn" id="tab-github" data-tab="github">GitHub Issues (Lista)</button>
+            <button class="tab-btn" id="tab-json" data-tab="json">JSON DTO</button>
+            <div class="tab-actions">
+              <button id="btn-copy" class="btn btn-sm btn-glass">📋 Copiar Contenido</button>
+              <button id="btn-download" class="btn btn-sm btn-glass">⬇️ Descargar .md</button>
+            </div>
+          </div>
+
+          <!-- Tab Contents -->
+          <div class="tab-content" id="tab-content-visual">
+            <div id="visual-task-list" class="task-list"></div>
+          </div>
+          <div class="tab-content hidden" id="tab-content-markdown">
+            <pre class="code-block"><code id="code-markdown"></code></pre>
+          </div>
+          <div class="tab-content hidden" id="tab-content-github">
+            <div id="github-issues-list" class="issues-grid"></div>
+          </div>
+          <div class="tab-content hidden" id="tab-content-json">
+            <pre class="code-block"><code id="code-json"></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROI Calculator Section -->
+  <section class="section roi-section" id="roi-calculator">
+    <div class="container">
+      <div class="glass-card roi-card">
+        <div class="roi-content">
+          <div class="section-header">
+            <span class="section-tag">CALCULADORA DE RETORNO</span>
+            <h2 class="section-title">¿Cuánto dinero estás perdiendo redactando tickets a mano?</h2>
+            <p class="section-description">
+              Los equipos de ingeniería desperdician hasta el 15% de su tiempo en ceremonias de planificación, redacción de épicas y corrección de historias mal especificadas.
+            </p>
+          </div>
+
+          <!-- Sliders Grid -->
+          <div class="sliders-grid">
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="hours-slider">Horas semanales que pierdes planificando:</label>
+                <span class="slider-value" id="val-hours">5 horas/sem</span>
+              </div>
+              <input type="range" id="hours-slider" min="1" max="15" value="5" step="1" class="slider-input">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="rate-slider">Costo por hora de tu equipo / desarrollador (USD):</label>
+                <span class="slider-value" id="val-rate">$35 USD/hora</span>
+              </div>
+              <input type="range" id="rate-slider" min="15" max="100" value="35" step="5" class="slider-input">
+            </div>
+          </div>
+        </div>
+
+        <!-- ROI Result Box -->
+        <div class="roi-result-box">
+          <div class="roi-stat">
+            <span class="stat-label">Ahorro Mensual Estimado:</span>
+            <span class="stat-number gradient-text" id="roi-monthly-savings">$700 USD</span>
+          </div>
+          <div class="roi-stat">
+            <span class="stat-label">Horas Recuperadas para Codear:</span>
+            <span class="stat-number highlight-emerald" id="roi-hours-saved">20 horas/mes</span>
+          </div>
+          <div class="roi-pill">
+            <span>Retorno de Inversión: <strong id="roi-multiple">46x</strong> sobre la suscripción Pro ($15/mo)</span>
+          </div>
+          <a href="#pricing" class="btn btn-primary btn-block">Asegurar Acceso Anticipado</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="section features-section" id="features">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="section-tag">CARACTERÍSTICAS TÉCNICAS</span>
+        <h2 class="section-title">Diseñado para la forma real en que programan los ingenieros</h2>
+      </div>
+
+      <div class="features-grid">
+        <div class="glass-card feature-card">
+          <div class="feature-icon">🧩</div>
+          <h3 class="feature-title">Desglose por Capas Arquitectónicas</h3>
+          <p class="feature-desc">
+            Organiza automáticamente cada tarea en capas claras: Database, Backend APIs, Frontend UI, Seguridad JWT y DevOps CI/CD. Cero mezclas confusas.
+          </p>
+        </div>
+
+        <div class="glass-card feature-card">
+          <div class="feature-icon">📐</div>
+          <h3 class="feature-title">Criterios de Aceptación Gherkin</h3>
+          <p class="feature-desc">
+            Genera criterios de prueba con formato estricto: <code>Dado que... Cuando... Entonces...</code> para que el equipo de QA o el desarrollador sepa exactamente cuándo la tarea está terminada.
+          </p>
+        </div>
+
+        <div class="glass-card feature-card">
+          <div class="feature-icon">📁</div>
+          <h3 class="feature-title">Archivos y Rutas Sugeridas</h3>
+          <p class="feature-desc">
+            Anticipa qué archivos deben crearse o modificarse (ej. <code>src/db/schema.prisma</code>, <code>src/controllers/auth.ts</code>) reduciendo la fricción mental de arranque.
+          </p>
+        </div>
+
+        <div class="glass-card feature-card">
+          <div class="feature-icon">💻</div>
+          <h3 class="feature-title">Extensión de VS Code & Cursor</h3>
+          <p class="feature-desc">
+            No salgas de tu editor. Haz clic derecho en cualquier archivo de especificación y genera el plan al costado en un documento Markdown editable.
+          </p>
+        </div>
+
+        <div class="glass-card feature-card">
+          <div class="feature-icon">🛡️</div>
+          <h3 class="feature-title">100% Privacidad con Ollama Local</h3>
+          <p class="feature-desc">
+            ¿Trabajas bajo acuerdos de confidencialidad estrictos? Conecta con tu instancia local de Ollama (Llama 3 / Mistral) sin enviar una sola línea de código a servidores de terceros.
+          </p>
+        </div>
+
+        <div class="glass-card feature-card">
+          <div class="feature-icon">🐙</div>
+          <h3 class="feature-title">Exportación Nativa a GitHub Issues</h3>
+          <p class="feature-desc">
+            Crea paquetes de archivos Markdown individuales listos para crear issues automáticamente con el GitHub CLI (<code>gh issue create</code>) o sincronizar con Jira.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing & Pre-Order Section -->
+  <section class="section pricing-section" id="pricing">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="section-tag">OFERTA DE LANZAMIENTO</span>
+        <h2 class="section-title">Precios transparentes y sin sorpresas</h2>
+        <p class="section-description">
+          Asegura los precios de preventa con 50% de descuento antes del lanzamiento oficial en Product Hunt.
+        </p>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- Free / Developer Card -->
+        <div class="glass-card pricing-card">
+          <div class="pricing-header">
+            <h3 class="plan-name">Desarrollador</h3>
+            <p class="plan-desc">Para probar el motor en proyectos personales.</p>
+            <div class="plan-price">
+              <span class="currency">$</span>
+              <span class="amount">0</span>
+              <span class="period">/ siempre</span>
+            </div>
+          </div>
+          <ul class="plan-features">
+            <li>✓ Hasta 5 planes al mes</li>
+            <li>✓ Exportación a Markdown y JSON</li>
+            <li>✓ Modo Offline y Mock provider</li>
+            <li>✓ Acceso a extensión de VS Code</li>
+            <li class="disabled">✗ Modelos ilimitados en la nube</li>
+            <li class="disabled">✗ Exportador por lotes a GitHub Issues</li>
+          </ul>
+          <a href="#simulator" class="btn btn-glass btn-block">Empezar Gratis</a>
+        </div>
+
+        <!-- Pro / Early-Bird Card (Highlighted) -->
+        <div class="glass-card pricing-card featured">
+          <div class="featured-badge">OFERTA EARLY-BIRD • 50% OFF</div>
+          <div class="pricing-header">
+            <h3 class="plan-name">Pro Solo</h3>
+            <p class="plan-desc">Para Tech Leads, seniors y consultores independientes.</p>
+            <div class="plan-price">
+              <span class="currency">$</span>
+              <span class="amount">15</span>
+              <span class="period">/ mes</span>
+            </div>
+            <span class="discount-note">Precio regular post-lanzamiento: $29/mes</span>
+          </div>
+          <ul class="plan-features">
+            <li>✓ <strong>Planes y desgloses ilimitados</strong></li>
+            <li>✓ Conexión con Gemini 1.5 & OpenAI</li>
+            <li>✓ Soporte ilimitado de Ollama Local</li>
+            <li>✓ Exportación directa a carpetas de GitHub Issues</li>
+            <li>✓ Extensión oficial de VS Code & Cursor</li>
+            <li>✓ Actualizaciones prioritarias de por vida</li>
+          </ul>
+          <button class="btn btn-primary btn-block btn-preorder" data-plan="pro">Reservar Preventa Pro ($15/mes)</button>
+        </div>
+
+        <!-- Lifetime Pass Card -->
+        <div class="glass-card pricing-card">
+          <div class="pricing-header">
+            <h3 class="plan-name">Pase Vitalicio (Lifetime)</h3>
+            <p class="plan-desc">Un solo pago para siempre. Cero suscripciones mensuales.</p>
+            <div class="plan-price">
+              <span class="currency">$</span>
+              <span class="amount">99</span>
+              <span class="period">/ pago único</span>
+            </div>
+            <span class="discount-note">Limitado a los primeros 50 desarrolladores</span>
+          </div>
+          <ul class="plan-features">
+            <li>✓ Licencia de por vida para 1 desarrollador</li>
+            <li>✓ Trae tu propia API Key (BYOK - $0 costo oculto)</li>
+            <li>✓ Todas las futuras versiones Pro incluidas</li>
+            <li>✓ Acceso al canal privado de Discord / feedback directo</li>
+            <li>✓ Garantía de reembolso sin preguntas de 14 días</li>
+          </ul>
+          <button class="btn btn-secondary btn-block btn-preorder" data-plan="lifetime">Adquirir Licencia Vitalicia ($99)</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pre-order / Waitlist Modal -->
+  <div class="modal-overlay hidden" id="preorder-modal">
+    <div class="modal-card glass-card">
+      <button class="modal-close" id="modal-close-btn">&times;</button>
+      <div class="modal-header">
+        <span class="modal-icon">🚀</span>
+        <h3 class="modal-title">Asegura tu cupo con 50% de Descuento</h3>
+        <p class="modal-subtitle">Ingresa tu correo para recibir tu clave de licencia y acceso anticipado al repositorio privado:</p>
+      </div>
+      <form id="preorder-form" class="modal-form">
+        <input type="hidden" id="selected-plan" value="pro">
+        <div class="form-group">
+          <label for="user-email">Correo Electrónico:</label>
+          <input type="email" id="user-email" required placeholder="tu.nombre@empresa.com" class="input-text">
+        </div>
+        <div class="form-group">
+          <label for="user-editor">¿Qué editor usas principalmente?</label>
+          <select id="user-editor" class="select-dropdown">
+            <option value="vscode">VS Code</option>
+            <option value="cursor">Cursor</option>
+            <option value="jetbrains">JetBrains (WebStorm / IntelliJ)</option>
+            <option value="neovim">Neovim / Terminal</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Confirmar y Obtener Acceso Inmediato</button>
+      </form>
+      <div id="modal-success" class="modal-success hidden">
+        <div class="success-icon">✅</div>
+        <h4>¡Reserva confirmada con éxito!</h4>
+        <p>Hemos guardado tu cupo de preventa. Te redirigiremos a la pasarela de Lemon Squeezy para activar tu licencia.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <div class="footer-left">
+        <div class="logo">
+          <span class="logo-icon">⚡</span>
+          <span>AI DevTask<span class="highlight">.planner</span></span>
+        </div>
+        <p class="footer-copy">© 2026 AI DevTask Planner. Construido para acelerar la productividad de los equipos de ingeniería.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#simulator">Simulador</a>
+        <a href="#roi-calculator">Calculadora</a>
+        <a href="#pricing">Precios</a>
+        <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
