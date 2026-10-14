@@ -27,6 +27,7 @@
         <a href="#roi-calculator">Calculadora ROI</a>
         <a href="#features">Arquitectura</a>
         <a href="#pricing">Precios</a>
+        <a href="#license-portal">Validar Licencia</a>
       </nav>
       <div class="nav-actions">
         <a href="#pricing" class="btn btn-secondary btn-sm" id="nav-early-bird">Acceso Anticipado -50%</a>
@@ -383,39 +384,213 @@
     </div>
   </section>
 
-  <!-- Pre-order / Waitlist Modal -->
-  <div class="modal-overlay hidden" id="preorder-modal">
-    <div class="modal-card glass-card">
-      <button class="modal-close" id="modal-close-btn">&times;</button>
-      <div class="modal-header">
-        <span class="modal-icon">🚀</span>
-        <h3 class="modal-title">Asegura tu cupo con 50% de Descuento</h3>
-        <p class="modal-subtitle">Ingresa tu correo para recibir tu clave de licencia y acceso anticipado al repositorio privado:</p>
+  <!-- Live License Portal Section -->
+  <section class="section license-portal-section" id="license-portal">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="section-tag">AUTOSERVICIO & ACTIVACIÓN</span>
+        <h2 class="section-title">Portal de Licencias & Verificación</h2>
+        <p class="section-description">
+          ¿Ya adquiriste tu clave de licencia Pro o Pase Vitalicio? Valida su estado en tiempo real, consulta dispositivos activos y obtén tus comandos de activación.
+        </p>
       </div>
-      <form id="preorder-form" class="modal-form">
-        <input type="hidden" id="selected-plan" value="pro">
-        <div class="form-group">
-          <label for="user-email">Correo Electrónico:</label>
-          <input type="email" id="user-email" required placeholder="tu.nombre@empresa.com" class="input-text">
+
+      <div class="glass-card license-portal-card">
+        <div class="portal-input-group">
+          <div class="portal-field">
+            <label for="portal-key-input">Ingresa tu Clave de Licencia:</label>
+            <div class="key-input-wrapper">
+              <span class="key-prefix-icon">🔑</span>
+              <input type="text" id="portal-key-input" placeholder="Ej: DT-PRO-7B9FEEC6-A5540EB5" class="input-text font-mono" value="DT-PRO-7B9FEEC6-A5540EB5">
+              <button class="btn btn-primary btn-sm" id="btn-verify-license">Verificar Clave</button>
+            </div>
+          </div>
+          <div class="portal-sample-keys">
+            <span class="sample-label">Prueba con claves demo activas:</span>
+            <button class="sample-pill" data-key="DT-PRO-7B9FEEC6-A5540EB5">Plan Pro ($15/mes)</button>
+            <button class="sample-pill" data-key="DT-LIFE-E45A89B2-3F91A802">Pase Vitalicio ($99)</button>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="user-editor">¿Qué editor usas principalmente?</label>
-          <select id="user-editor" class="select-dropdown">
-            <option value="vscode">VS Code</option>
-            <option value="cursor">Cursor</option>
-            <option value="jetbrains">JetBrains (WebStorm / IntelliJ)</option>
-            <option value="neovim">Neovim / Terminal</option>
-          </select>
+
+        <!-- Result Box -->
+        <div id="license-result-box" class="license-result-box">
+          <div class="license-status-header">
+            <div class="status-indicator active" id="lic-status-badge">
+              <span class="status-dot"></span>
+              <span id="lic-status-text">Licencia Activa y Verificada</span>
+            </div>
+            <span class="plan-tag-badge" id="lic-plan-tag">PLAN PRO</span>
+          </div>
+
+          <div class="license-details-grid">
+            <div class="detail-item">
+              <span class="detail-label">Clave Registrada</span>
+              <span class="detail-value font-mono" id="lic-display-key">DT-PRO-7B9FEEC6-A5540EB5</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Dispositivos / Activaciones</span>
+              <span class="detail-value" id="lic-display-activations">1 / 2 Dispositivos</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Próxima Renovación</span>
+              <span class="detail-value" id="lic-display-renewal">11 de Noviembre, 2026</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Soporte y Actualizaciones</span>
+              <span class="detail-value text-success" id="lic-display-support">Prioritario 24/7 Incluido</span>
+            </div>
+          </div>
+
+          <div class="activation-quick-guide">
+            <span class="guide-title">Comando rápido para activar en tu terminal:</span>
+            <div class="cli-command-box">
+              <code id="lic-cli-cmd">devtask auth activate DT-PRO-7B9FEEC6-A5540EB5</code>
+              <button class="btn btn-glass btn-xs" id="btn-copy-cli-cmd">Copiar</button>
+            </div>
+          </div>
         </div>
-        <button type="submit" class="btn btn-primary btn-block">Confirmar y Obtener Acceso Inmediato</button>
-      </form>
-      <div id="modal-success" class="modal-success hidden">
-        <div class="success-icon">✅</div>
-        <h4>¡Reserva confirmada con éxito!</h4>
-        <p>Hemos guardado tu cupo de preventa. Te redirigiremos a la pasarela de Lemon Squeezy para activar tu licencia.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Payment Gateway Checkout Modal -->
+  <div class="modal-overlay hidden" id="preorder-modal">
+    <div class="modal-card glass-card checkout-modal-card">
+      <button class="modal-close" id="modal-close-btn">&times;</button>
+      
+      <!-- Checkout Step 1: Form & Payment -->
+      <div id="checkout-view-form">
+        <div class="modal-header">
+          <div class="checkout-security-badge">
+            <span>🔒 CHECKOUT CIFRADO SSL 256-BIT</span>
+          </div>
+          <h3 class="modal-title" id="checkout-title">Completar Suscripción Pro</h3>
+          <p class="modal-subtitle">Acceso inmediato al motor de IA, extensión de VS Code y exportador ilimitado.</p>
+        </div>
+
+        <!-- Order Summary Box -->
+        <div class="order-summary-box">
+          <div class="summary-row">
+            <span class="summary-label" id="summary-plan-name">Plan Pro Solo (Early-Bird)</span>
+            <span class="summary-price" id="summary-plan-price">$15 USD <small>/ mes</small></span>
+          </div>
+          <div class="summary-row text-muted font-xs">
+            <span>Descuento de Preventa aplicado:</span>
+            <span class="discount-pill">-50% DE POR VIDA</span>
+          </div>
+        </div>
+
+        <form id="checkout-form" class="modal-form">
+          <input type="hidden" id="selected-plan" value="pro">
+          
+          <div class="form-group">
+            <label for="user-email">Correo Electrónico (para emitir la licencia):</label>
+            <input type="email" id="user-email" required placeholder="tu.nombre@empresa.com" class="input-text">
+          </div>
+
+          <!-- Payment Provider Tabs -->
+          <div class="form-group">
+            <label>Selecciona tu Pasarela de Pago:</label>
+            <div class="gateway-selector">
+              <label class="gateway-tab active" data-provider="lemonsqueezy">
+                <input type="radio" name="payment-provider" value="lemonsqueezy" checked class="hidden-radio">
+                <span class="gw-icon">🍋</span>
+                <span class="gw-title">Lemon Squeezy</span>
+                <span class="gw-subtitle">Tarjetas, Apple Pay, Google Pay</span>
+              </label>
+
+              <label class="gateway-tab" data-provider="stripe">
+                <input type="radio" name="payment-provider" value="stripe" class="hidden-radio">
+                <span class="gw-icon">💳</span>
+                <span class="gw-title">Tarjeta / Stripe</span>
+                <span class="gw-subtitle">Visa, Mastercard, Amex</span>
+              </label>
+
+              <label class="gateway-tab" data-provider="sandbox">
+                <input type="radio" name="payment-provider" value="sandbox" class="hidden-radio">
+                <span class="gw-icon">⚡</span>
+                <span class="gw-title">Modo Sandbox</span>
+                <span class="gw-subtitle">Simulación de pago instantánea</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Dynamic Card Fields (shown when card is selected) -->
+          <div id="card-fields-group" class="card-fields-container hidden">
+            <div class="form-group">
+              <label for="card-num">Número de Tarjeta:</label>
+              <input type="text" id="card-num" placeholder="4242 •••• •••• 4242" class="input-text font-mono" maxlength="19">
+            </div>
+            <div class="form-row-dual">
+              <div class="form-group">
+                <label for="card-exp">Vencimiento:</label>
+                <input type="text" id="card-exp" placeholder="MM/AA" class="input-text font-mono" maxlength="5">
+              </div>
+              <div class="form-group">
+                <label for="card-cvc">CVC:</label>
+                <input type="password" id="card-cvc" placeholder="•••" class="input-text font-mono" maxlength="4">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="user-editor">Entorno de Desarrollo Principal:</label>
+            <select id="user-editor" class="select-dropdown">
+              <option value="vscode">VS Code</option>
+              <option value="cursor">Cursor AI</option>
+              <option value="jetbrains">JetBrains (WebStorm / IntelliJ)</option>
+              <option value="neovim">Neovim / Terminal CLI</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-submit-payment">
+            <span id="btn-pay-text">Proceder al Pago Seguro ($15 USD)</span>
+            <span class="btn-arrow">→</span>
+          </button>
+
+          <div class="checkout-guarantee-note">
+            <span>🛡️ Garantía incondicional de reembolso de 14 días. Cancela en 1 clic.</span>
+          </div>
+        </form>
+      </div>
+
+      <!-- Checkout Step 2: Processing State -->
+      <div id="checkout-view-processing" class="checkout-state-view hidden">
+        <div class="spinner-large"></div>
+        <h4 class="state-title">Conectando con la Pasarela de Pago...</h4>
+        <p class="state-subtitle" id="processing-step-desc">Verificando sesión criptográfica y preparando emisión de licencia.</p>
+      </div>
+
+      <!-- Checkout Step 3: Success & Immediate License Delivery -->
+      <div id="checkout-view-success" class="checkout-state-view hidden">
+        <div class="success-icon-animated">🎉</div>
+        <h3 class="success-title">¡Pago Confirmado Exitosamente!</h3>
+        <p class="success-subtitle">Tu licencia oficial de AI DevTask Planner ha sido generada y registrada en el sistema.</p>
+
+        <div class="license-key-delivery-box">
+          <span class="key-delivery-label">TU CLAVE DE LICENCIA PRIVADA:</span>
+          <div class="key-display-highlight">
+            <span id="delivery-license-key" class="font-mono">DT-PRO-XXXX-XXXX-XXXX</span>
+            <button class="btn btn-primary btn-sm" id="btn-copy-delivery-key">Copiar</button>
+          </div>
+        </div>
+
+        <div class="terminal-activation-box">
+          <span class="term-label">Activa en tu consola con un solo comando:</span>
+          <div class="term-command">
+            <code id="delivery-terminal-cmd">devtask auth activate DT-PRO-XXXX</code>
+            <button class="btn btn-glass btn-xs" id="btn-copy-term-cmd">Copiar Comando</button>
+          </div>
+        </div>
+
+        <div class="success-actions-row">
+          <button class="btn btn-secondary btn-block" id="btn-download-license-json">Descargar Archivo de Licencia (.json)</button>
+          <button class="btn btn-glass btn-block" id="btn-close-checkout-success">Cerrar y Probar en el Simulador</button>
+        </div>
       </div>
     </div>
   </div>
+
 
   <!-- Footer -->
   <footer class="footer">

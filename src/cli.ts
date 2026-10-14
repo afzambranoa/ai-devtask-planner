@@ -9,6 +9,8 @@ import { generateSprintPlan } from './core/engine.js';
 import { exportToMarkdown } from './core/exporters/markdownExporter.js';
 import { exportGitHubIssues } from './core/exporters/githubExporter.js';
 import { exportToJson } from './core/exporters/jsonExporter.js';
+import { LicenseManager } from './licensing/licenseManager.js';
+import { PaymentGateway } from './licensing/paymentGateway.js';
 
 dotenv.config();
 
@@ -32,6 +34,15 @@ program
     console.log(chalk.bold.cyan('\n=================================================='));
     console.log(chalk.bold.cyan('       AI DevTask Planner - Sprint Engine        '));
     console.log(chalk.bold.cyan('==================================================\n'));
+
+    // Verificación de Licencia
+    const license = LicenseManager.getInstalledLicense();
+    if (license.active) {
+      console.log(chalk.bgGreen.black.bold(` [PLAN ${license.plan.toUpperCase()} ACTIVO] `) + chalk.green(` Licencia: ${license.key} (Ilimitado)`));
+    } else {
+      console.log(chalk.bgYellow.black.bold(` [PLAN DEVELOPER FREE] `) + chalk.gray(' 5 planes/mes incluidos. Para ilimitado: ') + chalk.cyan('devtask checkout pro'));
+    }
+    console.log('');
 
     let requirements = input;
     if (fs.existsSync(input)) {
@@ -101,4 +112,85 @@ program
     }
   });
 
+// Comandos de Licenciamiento y Auth
+const authCommand = program.command('auth').description('Gestionar licencia y autenticación de AI DevTask');
+
+authCommand
+  .command('status')
+  .description('Consultar el estado de tu licencia actual')
+  .action(() => {
+    const lic = LicenseManager.getInstalledLicense();
+    console.log(chalk.bold.cyan('\n=== Estado de Licencia AI DevTask Planner ===\n'));
+    if (lic.active && lic.key) {
+      const ver = LicenseManager.verifyLicense(lic.key);
+      console.log(chalk.green('Estado:        Activa ✅'));
+      console.log(`Plan:          ${chalk.bold.yellow(ver.plan.toUpperCase())}`);
+      console.log(`Clave:         ${chalk.white(lic.key)}`);
+      if (ver.customerEmail) console.log(`Propietario:   ${chalk.gray(ver.customerEmail)}`);
+      if (ver.expiresAt) console.log(`Vencimiento:   ${chalk.gray(new Date(ver.expiresAt).toLocaleDateString())}`);
+      console.log(`Activaciones:  ${chalk.cyan(`${ver.currentActivations || 1}/${ver.maxActivations || 2}`)} dispositivos`);
+    } else {
+      console.log(chalk.yellow('Estado:        Plan Free (Sin licencia Pro activada) ℹ️'));
+      console.log('Límite:        5 planes por mes.');
+      console.log(chalk.gray('\nPara activar una licencia:'));
+      console.log(chalk.cyan('  devtask auth activate <TU_CLAVE>'));
+      console.log(chalk.gray('Para adquirir una licencia:'));
+      console.log(chalk.cyan('  devtask checkout pro\n'));
+    }
+  });
+
+authCommand
+  .command('activate <key>')
+  .description('Activa una clave de licencia en esta máquina')
+  .action((key: string) => {
+    const res = LicenseManager.activateMachine(key);
+    if (res.success) {
+      console.log(chalk.green(`\n✔ ${res.message}\n`));
+    } else {
+      console.log(chalk.red(`\n✖ Error: ${res.message}\n`));
+      process.exit(1);
+    }
+  });
+
+authCommand
+  .command('logout')
+  .description('Desvincula la licencia local')
+  .action(() => {
+    LicenseManager.deactivateLocal();
+    console.log(chalk.yellow('\n✔ Licencia local removida. Ahora estás en modo Free.\n'));
+  });
+
+// Comando de Checkout
+program
+  .command('checkout [plan]')
+  .description('Inicia el proceso de suscripción o pago para Pro o Lifetime')
+  .option('-e, --email <email>', 'Correo del desarrollador para enviar la licencia', 'dev@example.com')
+  .option('-p, --provider <provider>', 'Proveedor: lemonsqueezy | stripe | sandbox', 'sandbox')
+  .action(async (planArg = 'pro', options) => {
+    const gateway = new PaymentGateway();
+    const plan = planArg.toLowerCase() as any;
+    console.log(chalk.cyan(`\nIniciando pasarela de pago para el plan [${plan.toUpperCase()}]...`));
+
+    const result = await gateway.createCheckout({
+      plan,
+      email: options.email,
+      provider: options.provider as any,
+    });
+
+    console.log(chalk.bold.green('\n=== Sesión de Pago Creada ===\n'));
+    console.log(`Plan:         ${chalk.yellow(result.plan.toUpperCase())}`);
+    console.log(`Precio:       ${chalk.bold.white(`$${result.amount} USD`)}`);
+    console.log(`Proveedor:    ${chalk.cyan(result.provider.toUpperCase())}`);
+    console.log(`Orden:        ${chalk.gray(result.orderId)}`);
+
+    if (result.licenseKey) {
+      console.log(`\n🎉 Clave emitida de inmediato: ${chalk.bold.green(result.licenseKey)}`);
+      console.log(chalk.gray(`Para activarla ahora mismo ejecuta:`));
+      console.log(chalk.cyan(`  devtask auth activate ${result.licenseKey}\n`));
+    } else {
+      console.log(`\nEnlace de Checkout oficial: ${chalk.underline.cyan(result.checkoutUrl)}\n`);
+    }
+  });
+
 program.parse();
+

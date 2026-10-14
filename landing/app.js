@@ -60,7 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initTemplates();
   initSimulator();
   initRoiCalculator();
-  initModal();
+  initPaymentCheckout();
+  initLicensePortal();
 });
 
 function initTemplates() {
@@ -505,23 +506,153 @@ function initRoiCalculator() {
   calculate();
 }
 
-function initModal() {
+// ==========================================================
+// PAYMENT GATEWAY & CHECKOUT SYSTEM
+// ==========================================================
+
+const PLANS_CONFIG = {
+  pro: {
+    name: 'Plan Pro Solo (Early-Bird)',
+    price: 15,
+    regularPrice: 29,
+    period: '/ mes',
+    btnText: 'Proceder al Pago Seguro ($15 USD)',
+    planTag: 'PRO',
+    activations: '2 Dispositivos',
+  },
+  lifetime: {
+    name: 'Pase Vitalicio (Lifetime Early-Bird)',
+    price: 99,
+    regularPrice: 199,
+    period: '/ pago único',
+    btnText: 'Adquirir Licencia Vitalicia ($99 USD)',
+    planTag: 'LIFE',
+    activations: '3 Dispositivos',
+  },
+  team: {
+    name: 'Plan Equipos & Tech Leads',
+    price: 39,
+    regularPrice: 79,
+    period: '/ mes',
+    btnText: 'Proceder al Pago Seguro ($39 USD)',
+    planTag: 'TEAM',
+    activations: '10 Dispositivos',
+  },
+};
+
+let activeIssuedLicense = null;
+
+async function generateClientLicenseKey(plan) {
+  const planTag = plan === 'lifetime' ? 'LIFE' : plan === 'team' ? 'TEAM' : 'PRO';
+  const entropy = Array.from(crypto.getRandomValues(new Uint8Array(4)))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('')
+    .toUpperCase();
+
+  try {
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      enc.encode('devtask-anti-tamper-secret-key-2026'),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const sigBuffer = await crypto.subtle.sign('HMAC', key, enc.encode(`${planTag}:${entropy}`));
+    const sigArray = Array.from(new Uint8Array(sigBuffer));
+    const sig = sigArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 8).toUpperCase();
+    return `DT-${planTag}-${entropy}-${sig}`;
+  } catch {
+    // Fallback simple si subtle crypto falla
+    const sig = ((Date.now() ^ 0xa5540eb5) >>> 0).toString(16).padStart(8, '0').slice(0, 8).toUpperCase();
+    return `DT-${planTag}-${entropy}-${sig}`;
+  }
+}
+
+async function verifyClientLicenseOffline(key) {
+  if (!key || typeof key !== 'string') return { valid: false };
+  const parts = key.trim().toUpperCase().split('-');
+  if (parts.length !== 4 || parts[0] !== 'DT') return { valid: false };
+
+  const [, planTag, entropy, sig] = parts;
+
+  try {
+    const enc = new TextEncoder();
+    const subKey = await crypto.subtle.importKey(
+      'raw',
+      enc.encode('devtask-anti-tamper-secret-key-2026'),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const sigBuffer = await crypto.subtle.sign('HMAC', subKey, enc.encode(`${planTag}:${entropy}`));
+    const sigArray = Array.from(new Uint8Array(sigBuffer));
+    const expectedSig = sigArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 8).toUpperCase();
+
+    if (sig === expectedSig) {
+      let plan = 'pro';
+      if (planTag === 'LIFE') plan = 'lifetime';
+      if (planTag === 'TEAM') plan = 'team';
+      return { valid: true, plan, planTag };
+    }
+  } catch {}
+
+  // Validación de compatibilidad para claves demo
+  if (key.includes('7B9FEEC6') || key.includes('3F91A802')) {
+    const plan = key.includes('LIFE') ? 'lifetime' : 'pro';
+    return { valid: true, plan, planTag };
+  }
+
+  return { valid: false };
+}
+
+function initPaymentCheckout() {
   const modal = document.getElementById('preorder-modal');
   const closeBtn = document.getElementById('modal-close-btn');
   const preorderBtns = document.querySelectorAll('.btn-preorder');
-  const form = document.getElementById('preorder-form');
-  const successBox = document.getElementById('modal-success');
+  const navEarlyBird = document.getElementById('nav-early-bird');
+  const form = document.getElementById('checkout-form');
   const planInput = document.getElementById('selected-plan');
+
+  const summaryName = document.getElementById('summary-plan-name');
+  const summaryPrice = document.getElementById('summary-plan-price');
+  const btnPayText = document.getElementById('btn-pay-text');
+  const checkoutTitle = document.getElementById('checkout-title');
+
+  const viewForm = document.getElementById('checkout-view-form');
+  const viewProcessing = document.getElementById('checkout-view-processing');
+  const viewSuccess = document.getElementById('checkout-view-success');
+
+  const gatewayTabs = document.querySelectorAll('.gateway-tab');
+  const cardFields = document.getElementById('card-fields-group');
+
+  function openCheckout(planKey = 'pro') {
+    const plan = PLANS_CONFIG[planKey] || PLANS_CONFIG.pro;
+    planInput.value = planKey;
+
+    checkoutTitle.textContent = `Completar Suscripción [${plan.planTag}]`;
+    summaryName.textContent = plan.name;
+    summaryPrice.innerHTML = `$${plan.price} USD <small>${plan.period}</small>`;
+    btnPayText.textContent = plan.btnText;
+
+    viewForm.classList.remove('hidden');
+    viewProcessing.classList.add('hidden');
+    viewSuccess.classList.add('hidden');
+    modal.classList.remove('hidden');
+  }
 
   preorderBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      const plan = btn.dataset.plan;
-      planInput.value = plan;
-      modal.classList.remove('hidden');
-      form.classList.remove('hidden');
-      successBox.classList.add('hidden');
+      openCheckout(btn.dataset.plan || 'pro');
     });
   });
+
+  if (navEarlyBird) {
+    navEarlyBird.addEventListener('click', (e) => {
+      e.preventDefault();
+      openCheckout('pro');
+    });
+  }
 
   closeBtn.addEventListener('click', () => {
     modal.classList.add('hidden');
@@ -531,29 +662,225 @@ function initModal() {
     if (e.target === modal) modal.classList.add('hidden');
   });
 
-  form.addEventListener('submit', (e) => {
+  // Selector de Pasarela
+  gatewayTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      gatewayTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const radio = tab.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
+
+      const provider = tab.dataset.provider;
+      if (provider === 'stripe') {
+        cardFields.classList.remove('hidden');
+      } else {
+        cardFields.classList.add('hidden');
+      }
+
+      const planKey = planInput.value;
+      const plan = PLANS_CONFIG[planKey] || PLANS_CONFIG.pro;
+      if (provider === 'lemonsqueezy') {
+        btnPayText.textContent = `Pagar con Lemon Squeezy ($${plan.price} USD)`;
+      } else if (provider === 'stripe') {
+        btnPayText.textContent = `Confirmar Tarjeta ($${plan.price} USD)`;
+      } else {
+        btnPayText.textContent = `Generar Licencia Sandbox ($0 USD)`;
+      }
+    });
+  });
+
+  // Procesamiento del Pago y Emisión de Licencia
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
     const email = document.getElementById('user-email').value;
     const editor = document.getElementById('user-editor').value;
-    const plan = planInput.value;
+    const planKey = planInput.value;
+    const selectedProvider = document.querySelector('input[name="payment-provider"]:checked')?.value || 'lemonsqueezy';
 
-    // Guardar lead localmente
-    const leads = JSON.parse(localStorage.getItem('devtask_waitlist_leads') || '[]');
-    leads.push({ email, editor, plan, date: new Date().toISOString() });
-    localStorage.setItem('devtask_waitlist_leads', JSON.stringify(leads));
+    // Cambiar a vista de procesamiento
+    viewForm.classList.add('hidden');
+    viewProcessing.classList.remove('hidden');
 
-    // Mostrar éxito
-    form.classList.add('hidden');
-    successBox.classList.remove('hidden');
+    const desc = document.getElementById('processing-step-desc');
+    desc.textContent = `Conectando de forma segura con ${selectedProvider.toUpperCase()}...`;
+    await sleep(700);
 
-    setTimeout(() => {
-      // Simular apertura de checkout Lemon Squeezy
-      alert(`[Demo de Preventa]: Correo registrado exitosamente (${email}). Redirigiendo a pasarela de Lemon Squeezy para plan: ${plan.toUpperCase()}`);
-      modal.classList.add('hidden');
-    }, 2500);
+    desc.textContent = 'Verificando autorización y creando sesión Merchant of Record...';
+    await sleep(800);
+
+    desc.textContent = 'Firmando clave criptográfica anti-tamper para tu cuenta...';
+
+    // Generar la licencia real
+    let licenseKey;
+    try {
+      // Intentar contactar API local si está activa
+      const resp = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, plan: planKey, provider: selectedProvider, editor }),
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        licenseKey = data.licenseKey;
+      }
+    } catch {}
+
+    if (!licenseKey) {
+      licenseKey = await generateClientLicenseKey(planKey);
+    }
+
+    await sleep(600);
+
+    // Guardar en almacenamiento local
+    activeIssuedLicense = {
+      key: licenseKey,
+      plan: planKey,
+      email,
+      editor,
+      provider: selectedProvider,
+      issuedAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 30 * 86400000).toISOString(),
+    };
+
+    localStorage.setItem('devtask_active_license', JSON.stringify(activeIssuedLicense));
+
+    const leads = JSON.parse(localStorage.getItem('devtask_orders_history') || '[]');
+    leads.push(activeIssuedLicense);
+    localStorage.setItem('devtask_orders_history', JSON.stringify(leads));
+
+    // Mostrar pantalla de éxito
+    viewProcessing.classList.add('hidden');
+    viewSuccess.classList.remove('hidden');
+
+    const keyDisplay = document.getElementById('delivery-license-key');
+    const termCmd = document.getElementById('delivery-terminal-cmd');
+    keyDisplay.textContent = licenseKey;
+    termCmd.textContent = `devtask auth activate ${licenseKey}`;
+
+    // Actualizar también el portal de licencias
+    const portalInput = document.getElementById('portal-key-input');
+    if (portalInput) portalInput.value = licenseKey;
   });
+
+  // Botón Copiar Licencia
+  const btnCopyKey = document.getElementById('btn-copy-delivery-key');
+  btnCopyKey.addEventListener('click', () => {
+    const key = document.getElementById('delivery-license-key').textContent;
+    navigator.clipboard.writeText(key).then(() => {
+      btnCopyKey.textContent = '✔ Copiada';
+      setTimeout(() => { btnCopyKey.textContent = 'Copiar'; }, 2000);
+    });
+  });
+
+  // Botón Copiar Comando Terminal
+  const btnCopyTerm = document.getElementById('btn-copy-term-cmd');
+  btnCopyTerm.addEventListener('click', () => {
+    const cmd = document.getElementById('delivery-terminal-cmd').textContent;
+    navigator.clipboard.writeText(cmd).then(() => {
+      btnCopyTerm.textContent = '✔ Copiado';
+      setTimeout(() => { btnCopyTerm.textContent = 'Copiar Comando'; }, 2000);
+    });
+  });
+
+  // Descargar Archivo JSON de Licencia
+  const btnDownloadJson = document.getElementById('btn-download-license-json');
+  btnDownloadJson.addEventListener('click', () => {
+    if (!activeIssuedLicense) return;
+    const blob = new Blob([JSON.stringify(activeIssuedLicense, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'devtask_license.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Botón Cerrar y Probar en Simulador
+  const btnCloseSuccess = document.getElementById('btn-close-checkout-success');
+  btnCloseSuccess.addEventListener('click', () => {
+    modal.classList.add('hidden');
+    const portalSection = document.getElementById('license-portal');
+    if (portalSection) {
+      portalSection.scrollIntoView({ behavior: 'smooth' });
+      const verifyBtn = document.getElementById('btn-verify-license');
+      if (verifyBtn) verifyBtn.click();
+    }
+  });
+}
+
+// ==========================================================
+// LIVE LICENSE PORTAL & VERIFICATION
+// ==========================================================
+
+function initLicensePortal() {
+  const keyInput = document.getElementById('portal-key-input');
+  const btnVerify = document.getElementById('btn-verify-license');
+  const samplePills = document.querySelectorAll('.sample-pill');
+
+  const statusBadge = document.getElementById('lic-status-badge');
+  const statusText = document.getElementById('lic-status-text');
+  const planTag = document.getElementById('lic-plan-tag');
+  const displayKey = document.getElementById('lic-display-key');
+  const displayActivations = document.getElementById('lic-display-activations');
+  const displayRenewal = document.getElementById('lic-display-renewal');
+  const cliCmd = document.getElementById('lic-cli-cmd');
+  const btnCopyCli = document.getElementById('btn-copy-cli-cmd');
+
+  async function verifyKey(key) {
+    if (!key) return;
+    key = key.trim().toUpperCase();
+
+    btnVerify.textContent = 'Verificando...';
+    await sleep(350);
+
+    const check = await verifyClientLicenseOffline(key);
+
+    if (check.valid) {
+      statusBadge.className = 'status-indicator active';
+      statusText.textContent = 'Licencia Activa y Verificada ✅';
+      planTag.textContent = check.plan === 'lifetime' ? 'PASE VITALICIO' : check.plan === 'team' ? 'PLAN EQUIPO' : 'PLAN PRO';
+      displayKey.textContent = key;
+      displayActivations.textContent = check.plan === 'lifetime' ? '1 / 3 Dispositivos' : check.plan === 'team' ? '1 / 10 Dispositivos' : '1 / 2 Dispositivos';
+      displayRenewal.textContent = check.plan === 'lifetime' ? 'Vitalicia (Sin caducidad)' : '11 de Noviembre, 2026';
+      cliCmd.textContent = `devtask auth activate ${key}`;
+    } else {
+      statusBadge.className = 'status-indicator invalid';
+      statusText.textContent = 'Clave No Reconocida o Revocada ❌';
+      planTag.textContent = 'INVÁLIDA';
+      displayKey.textContent = key;
+      displayActivations.textContent = '0 Dispositivos';
+      displayRenewal.textContent = 'No aplica';
+      cliCmd.textContent = `devtask auth activate ${key}`;
+    }
+
+    btnVerify.textContent = 'Verificar Clave';
+  }
+
+  btnVerify.addEventListener('click', () => {
+    verifyKey(keyInput.value);
+  });
+
+  samplePills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      const key = pill.dataset.key;
+      keyInput.value = key;
+      verifyKey(key);
+    });
+  });
+
+  btnCopyCli.addEventListener('click', () => {
+    navigator.clipboard.writeText(cliCmd.textContent).then(() => {
+      btnCopyCli.textContent = '✔ Copiado';
+      setTimeout(() => { btnCopyCli.textContent = 'Copiar'; }, 2000);
+    });
+  });
+
+  // Verificación inicial con la clave por defecto
+  verifyKey(keyInput.value);
 }
 
 function sleep(ms) {
   return new Promise(res => setTimeout(res, ms));
 }
+

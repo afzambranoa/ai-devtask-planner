@@ -11,6 +11,8 @@
     "dev": "tsx src/cli.ts",
     "build": "tsc",
     "start": "node dist/cli.js",
+    "server": "tsx src/server.ts",
+    "server:start": "node dist/server.js",
     "demo": "tsx src/cli.ts plan examples/sample_prd.md --provider mock"
   },
   "dependencies": {
