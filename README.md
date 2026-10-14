@@ -1,77 +1,85 @@
-# AI DevTask Planner 🚀
-### *Motor Inteligente de Planificación y Desglose de Software con IA*
+﻿# AI DevTask Planner ⚡
+### *Motor de Inteligencia Artificial para Desglose de Software, Arquitectura y Creación de Sprints*
 
-> **Propósito:** Transformar requerimientos en bruto, PRDs o historias de usuario en un **Sprint Plan exhaustivo** con descomposición arquitectónica, estimaciones en horas, criterios de aceptación Gherkin y exportación directa a GitHub Issues o Markdown.
-> **Modelo de Negocio:** Micro-SaaS / Developer Tool con modelo freemium y suscripción de $15 a $39 USD/mes.
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Google Gemini](https://img.shields.io/badge/Gemini_API-8E75C2?style=flat-square&logo=google&logoColor=white)](https://ai.google.dev/)
+[![Stream-Arch Tech](https://img.shields.io/badge/By-Stream--Arch_Tech-00DC82?style=flat-square)](https://stream-arch.tech)
+[![Live Demo](https://img.shields.io/badge/Demo-devtask.stream--arch.tech-blue?style=flat-square)](https://devtask.stream-arch.tech)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
----
-
-## 🏗️ Arquitectura del Core Engine
-
-```
-Entrada (PRD / Markdown / Texto)
-            │
-            ▼
-┌───────────────────────────────────────┐
-│     AI DevTask Planning Engine        │
-│  - Prompts de Arquitectura Principal  │
-│  - Multi-Provider: Gemini / OpenAI /  │
-│    Ollama / Mock                      │
-│  - Validación estricta con Zod        │
-└───────────────────┬───────────────────┘
-                    │
-                    ▼
-┌───────────────────────────────────────┐
-│              Exporters                │
-│  ├── SPRINT_PLAN.md (Markdown limpio) │
-│  ├── sprint_plan.json (JSON API DTO)  │
-│  └── github_issues/ (Archivos .md)    │
-└───────────────────┬───────────────────┘
-                    │
-                    ▼
-┌───────────────────────────────────────┐
-│       Payment & Licensing Gateway     │
-│  - Lemon Squeezy (Merchant of Record) │
-│  - Stripe Checkout & Direct Cards     │
-│  - Claves Criptográficas Offline      │
-└───────────────────────────────────────┘
-```
+> **Propuesta de Valor:** Transforma requerimientos vagos, PRDs o historias de usuario en un **Sprint Plan arquitectónico exhaustivo** en segundos: desglose de épicas y micro-tareas, estimaciones de esfuerzo, criterios de aceptación en formato Gherkin (*Given-When-Then*), sugerencia de archivos a modificar y exportación directa a GitHub Issues, Linear o Markdown.
+>
+> 🌐 **Landing & Simulador en Vivo:** [https://devtask.stream-arch.tech](https://devtask.stream-arch.tech)
 
 ---
 
-## ⚡ Guía de Uso Rápido
+## 🚀 Características Principales
 
-### 1. Ejecutar Demostración Inmediata (Modo Offline / Mock)
+* 🧠 **Arquitecto Virtual de Software:** Aplica principios de diseño SOLID, patrones limpios y análisis de dependencias técnicas antes de escribir una sola línea de código.
+* 📋 **Criterios de Aceptación Gherkin:** Genera especificaciones ejecutables (`Given-When-Then`) listas para tests en Vitest, Jest o Playwright.
+* 🛠️ **Preparador de Contexto para IDEs de IA:** Optimizado para alimentar prompts a Cursor, Windsurf, Claude Code y Copilot con los archivos sugeridos a editar.
+* 📦 **Exportación Multi-Formato con 1 Clic:**
+  * `SPRINT_PLAN.md`: Reporte ejecutivo en Markdown para Tech Leads y clientes.
+  * `github_issues/`: Archivos individuales listos para ser creados como issues en repositorios.
+  * `sprint_plan.json`: DTO estructurado con validación Zod en tiempo de ejecución.
+* 🔌 **Multi-Proveedor de IA:** Soporte nativo para Google Gemini (1.5 Flash / 2.0 Flash), OpenAI (GPT-4o / mini), modelos locales vía Ollama (Llama 3 / Mistral con 100% privacidad) y motor Mock offline.
+* 💳 **Pasarela de Licencias & Pagos:** Conector integrado con Lemon Squeezy (Merchant of Record) y generador criptográfico de licencias anti-tamper offline.
+
+---
+
+## 🏗️ Arquitectura del Sistema
+
+```mermaid
+graph TD
+    subgraph "Entrada del Desarrollador"
+        A[PRD / Especificación / Ticket en Markdown]
+    end
+
+    subgraph "AI DevTask Core Engine"
+        B[Parser & Context Analyzer] --> C[AI Architecture Engine: Gemini / OpenAI / Ollama]
+        C --> D[Validador de Esquema Estricto: Zod]
+    end
+
+    subgraph "Canales de Salida"
+        D --> E[SPRINT_PLAN.md / Reporte Ejecutivo]
+        D --> F[github_issues/ / Tickets Granulares]
+        D --> G[sprint_plan.json / Integración con APIs]
+        D --> H[Prompt Contextual para Cursor / Windsurf]
+    end
+
+    A --> B
+```
+
+---
+
+## ⚡ Guía de Inicio Rápido (CLI)
+
+### 1. Clonar e Instalar Dependencias
+```bash
+git clone https://github.com/TU_USUARIO/ai-devtask-planner.git
+cd ai-devtask-planner
+npm install
+```
+
+### 2. Ejecutar Demostración Inmediata (Modo Offline / Mock)
 ```bash
 npm run demo
 ```
-Esto analiza el archivo de ejemplo `examples/sample_prd.md` y genera la carpeta `output/` con todos los formatos listos.
+Esto procesa el archivo de prueba `examples/sample_prd.md` y genera la carpeta `output/` con el plan de sprint completo y los issues desglosados.
 
-### 2. Planificar con Google Gemini
+### 3. Planificar con Google Gemini API
 ```bash
-set GEMINI_API_KEY=tu_api_key_aqui
-npm run dev -- plan tu_requerimiento.md -p gemini -m gemini-1.5-flash
+# Configura tu API Key
+set GEMINI_API_KEY=tu_api_key_aqui   # En Windows
+export GEMINI_API_KEY=tu_api_key_aqui # En Linux/macOS
+
+npm run dev -- plan mi_requerimiento.md -p gemini -m gemini-1.5-flash
 ```
 
-### 3. Planificar con Modelos Locales (Ollama / Privacidad Total)
+### 4. Planificar con Modelos Locales (Ollama / Privacidad Total)
 ```bash
-# Requiere Ollama corriendo localmente
-npm run dev -- plan tu_requerimiento.md -p ollama -m llama3
-```
-
-### 4. Gestión de Licencias & Pasarela de Pago
-```bash
-# Consultar estado de licencia y cuota de planes
-node dist/cli.js auth status
-
-# Iniciar checkout y emitir clave (sandbox o lemonsqueezy)
-node dist/cli.js checkout pro --email dev@tuempresa.com
-
-# Activar una clave de licencia en tu máquina
-node dist/cli.js auth activate DT-PRO-TU-CLAVE-AQUI
-
-# Iniciar servidor API de pagos y webhooks (Puerto 3000)
-npm run server
+# Con Ollama activo en local
+npm run dev -- plan mi_requerimiento.md -p ollama -m llama3
 ```
 
 ### 5. Compilar para Producción
@@ -82,29 +90,44 @@ node dist/cli.js plan examples/sample_prd.md --provider mock
 
 ---
 
-## 💳 Arquitectura de la Pasarela de Pago
+## 💻 Interfaz Web & Despliegue
 
-* **Merchant of Record (MoR):** Integración nativa con **Lemon Squeezy API v1** (manejo automático de impuestos, facturación electrónica e IVA internacional para SaaS).
-* **Direct Card & Stripe:** Soporte para tarjetas Visa, Mastercard, Amex.
-* **Generador Criptográfico Anti-Tamper:** Claves de licencia en formato `DT-{PLAN}-{ENTROPY}-{HMAC_SIG}` verificables matemáticamente sin conexión a internet (ideal para entornos con Ollama y privacidad total).
-* **Landing & Portal de Autoservicio:** Modal de checkout de alta conversión con entrega inmediata de clave, comando terminal y portal de validación en tiempo real.
+La carpeta `landing/` contiene la aplicación web de autoservicio con:
+* **Simulador interactivo en tiempo real** (prueba instantánea con prompts de ejemplo).
+* **Calculadora interactiva de ROI** (demuestra el ahorro mensual en horas de ingeniería).
+* **Portal de verificación de licencias criptográficas**.
+* **Modal de checkout conectado a Lemon Squeezy**.
+
+Desplegable con 1 clic en Vercel o Cloudflare Pages gracias al archivo `vercel.json` incluido.
 
 ---
 
-## 📁 Estructura del Código
+## 📂 Estructura del Proyecto
 
-* `src/types/index.ts`: Definición de interfaces tipadas (SprintPlan, Epic, SubTask, LicenseKeyData, CheckoutRequest).
-* `src/licensing/`:
-  * `licenseManager.ts`: Generación criptográfica, validación offline/online y control de activaciones.
-  * `paymentGateway.ts`: Conector multi-proveedor para Lemon Squeezy, Stripe y Sandbox interactivo.
-* `src/server.ts`: Servidor HTTP API ligero para checkouts, webhooks y verificación de licencias.
-* `src/core/schema.ts`: Esquemas de validación Zod en tiempo de ejecución.
-* `src/core/prompts.ts`: Prompt del Arquitecto Principal de Software con formato Gherkin.
-* `src/core/engine.ts`: Conectores para Gemini, OpenAI, Ollama y Mock.
-* `src/core/exporters/`:
-  * `markdownExporter.ts`: Genera reportes ejecutivos legibles.
-  * `githubExporter.ts`: Genera issues individuales listos para GitHub / Jira.
-  * `jsonExporter.ts`: Exportación de datos estructurados para APIs web.
-* `src/cli.ts`: Interfaz CLI con subcomandos `plan`, `auth` (status, activate, logout) y `checkout`.
-* `landing/`: Landing page de conversión con simulador interactivo, calculadora de ROI, portal de licencias y checkout modal.
-* `docs/`: Documentación del Sistema Operativo de Ingresos Pasivos y Plan Financiero.
+```text
+ai-task-planner/
+├── landing/              # Web App y simulador interactivo de alta conversión
+│   ├── index.html        # Landing page semántica y optimizada para SEO
+│   ├── style.css         # Sistema de diseño dark-mode premium
+│   └── app.js            # Lógica interactiva del simulador, ROI y modal
+├── src/
+│   ├── cli.ts            # CLI ejecutable con comandos 'plan', 'auth', 'checkout'
+│   ├── server.ts         # Servidor API ligero para webhooks y licencias
+│   ├── core/
+│   │   ├── engine.ts     # Orquestador multi-modelo (Gemini, OpenAI, Ollama)
+│   │   ├── prompts.ts    # Prompt maestro del Arquitecto de Software
+│   │   ├── schema.ts     # Esquemas de validación con Zod
+│   │   └── exporters/    # Generadores de Markdown, JSON y GitHub Issues
+│   └── licensing/
+│       ├── licenseManager.ts  # Firmas criptográficas HMAC y validación offline
+│       └── paymentGateway.ts  # Conectores Lemon Squeezy, Stripe y Sandbox
+├── examples/             # Ejemplos de PRDs y especificaciones técnicas
+├── output/               # Directorio generado con sprints e issues exportados
+└── vercel.json           # Configuración de despliegue en Vercel
+```
+
+---
+
+## 📄 Licencia
+
+Desarrollado bajo licencia MIT por **[Stream-Arch Tech](https://stream-arch.tech)**. Siéntete libre de utilizarlo, modificarlo y contribuir al ecosistema de herramientas de desarrollo asistidas por IA.
