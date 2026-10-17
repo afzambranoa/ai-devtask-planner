@@ -2,6 +2,6 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/", "destination": "/landing/index.html" },
-    { "source": "/(.*)", "destination": "/landing/$1" }
+    { "source": "/((?!api(?:/|$)).*)", "destination": "/landing/$1" }
   ]
 }

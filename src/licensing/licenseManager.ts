@@ -10,8 +10,12 @@ import {
 } from '../types/index.js';
 
 const MASTER_SIGNING_SECRET = process.env.LICENSE_MASTER_SECRET || 'devtask-anti-tamper-secret-key-2026';
-const DB_PATH = path.resolve(process.cwd(), 'data/licenses_db.json');
-const USER_CONFIG_DIR = path.join(os.homedir(), '.ai-devtask');
+const DB_PATH = process.env.VERCEL
+  ? path.join(os.tmpdir(), 'licenses_db.json')
+  : path.resolve(process.cwd(), 'data/licenses_db.json');
+const USER_CONFIG_DIR = process.env.VERCEL
+  ? path.join(os.tmpdir(), '.ai-devtask')
+  : path.join(os.homedir(), '.ai-devtask');
 const USER_LICENSE_FILE = path.join(USER_CONFIG_DIR, 'license.json');
 const WORKSPACE_LICENSE_FILE = path.resolve(process.cwd(), '.devtask_license.json');
 
