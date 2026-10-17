@@ -23,7 +23,15 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ success: false, message: 'Faltan campos requeridos: email y plan.' });
     }
 
+    const OFFICIAL_LEMON_CHECKOUT = 'https://stream-arch.lemonsqueezy.com/checkout/buy/13a8729f-a2e2-4e42-81a9-8765a9a98578';
     const result = await gateway.createCheckout(data);
+
+    if (data.provider === 'lemonsqueezy' && !result.checkoutUrl) {
+      result.checkoutUrl = data.email 
+        ? `${OFFICIAL_LEMON_CHECKOUT}?checkout[email]=${encodeURIComponent(data.email)}`
+        : OFFICIAL_LEMON_CHECKOUT;
+    }
+
     return res.status(200).json(result);
   } catch (err: any) {
     return res.status(500).json({ success: false, message: err.message });

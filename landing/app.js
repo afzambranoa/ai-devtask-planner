@@ -711,10 +711,25 @@ function initPaymentCheckout() {
 
     desc.textContent = 'Firmando clave criptográfica anti-tamper para tu cuenta...';
 
+    const OFFICIAL_LEMON_CHECKOUT = 'https://stream-arch.lemonsqueezy.com/checkout/buy/13a8729f-a2e2-4e42-81a9-8765a9a98578';
+
+    if (selectedProvider === 'lemonsqueezy') {
+      const checkoutUrl = email 
+        ? `${OFFICIAL_LEMON_CHECKOUT}?checkout[email]=${encodeURIComponent(email)}` 
+        : OFFICIAL_LEMON_CHECKOUT;
+
+      // Abrir checkout seguro oficial de Lemon Squeezy
+      if (window.LemonSqueezy) {
+        window.LemonSqueezy.Url.Open(checkoutUrl);
+      } else {
+        window.open(checkoutUrl, '_blank');
+      }
+    }
+
     // Generar la licencia real
     let licenseKey;
     try {
-      // Intentar contactar API local si está activa
+      // Intentar contactar API si está activa
       const resp = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
