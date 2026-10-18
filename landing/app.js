@@ -522,10 +522,10 @@ const PLANS_CONFIG = {
   },
   lifetime: {
     name: 'Pase Vitalicio (Lifetime Early-Bird)',
-    price: 99,
+    price: 79,
     regularPrice: 199,
     period: '/ pago único',
-    btnText: 'Adquirir Licencia Vitalicia ($99 USD)',
+    btnText: 'Adquirir Licencia Vitalicia ($79 USD)',
     planTag: 'LIFE',
     activations: '3 Dispositivos',
   },
@@ -711,12 +711,17 @@ function initPaymentCheckout() {
 
     desc.textContent = 'Firmando clave criptográfica anti-tamper para tu cuenta...';
 
-    const OFFICIAL_LEMON_CHECKOUT = 'https://stream-arch.lemonsqueezy.com/checkout/buy/13a8729f-a2e2-4e42-81a9-8765a9a98578';
+    const LEMON_CHECKOUTS = {
+      pro: 'https://stream-arch.lemonsqueezy.com/checkout/buy/d8385d75-836a-413f-a0f7-89d6bfcd0ed4',
+      lifetime: 'https://stream-arch.lemonsqueezy.com/checkout/buy/13a8729f-a2e2-4e42-81a9-8765a9a98578',
+      team: 'https://stream-arch.lemonsqueezy.com/checkout/buy/13a8729f-a2e2-4e42-81a9-8765a9a98578',
+    };
 
     if (selectedProvider === 'lemonsqueezy') {
+      const targetUrl = LEMON_CHECKOUTS[planKey] || LEMON_CHECKOUTS.pro;
       const checkoutUrl = email 
-        ? `${OFFICIAL_LEMON_CHECKOUT}?checkout[email]=${encodeURIComponent(email)}` 
-        : OFFICIAL_LEMON_CHECKOUT;
+        ? `${targetUrl}?checkout[email]=${encodeURIComponent(email)}` 
+        : targetUrl;
 
       // Abrir checkout seguro oficial de Lemon Squeezy
       if (window.LemonSqueezy) {
