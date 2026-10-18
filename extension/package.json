@@ -3,7 +3,14 @@
   "displayName": "AI DevTask Planner (VS Code & Cursor)",
   "description": "Desglose automatico de PRDs y requerimientos en Sprint Plans y GitHub Issues con IA",
   "version": "1.0.0",
-  "publisher": "devtask",
+  "publisher": "Stream-ArchTech",
+  "icon": "logo.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/afzambranoa/ai-devtask-planner"
+  },
+  "homepage": "https://devtask.stream-arch.tech",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"
   },
